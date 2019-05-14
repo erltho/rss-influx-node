@@ -38,7 +38,9 @@ Date.time = function() { return Date.now().getUnixTime(); }
 
 const express = require('express')
 const app = express();
-var njson = {};
+import {parser} from 'xmlToJson';
+
+
 
 
 
@@ -57,7 +59,7 @@ app.get('/', (req, res) => {
   }).finally(() => {
     console.log('Everything done');
   });
-*/
+
   parse(url).then((feed) =>{
     for (entry in feed.entries){
 
@@ -83,9 +85,8 @@ app.get('/', (req, res) => {
     }
     njson = feed;
     console.log(njson);
-    
   });
-  
+  */
 });
 app.listen(8000, () => {
   
