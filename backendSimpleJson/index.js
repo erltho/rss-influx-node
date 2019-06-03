@@ -28,66 +28,46 @@ request({
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-//Get Unix Timestamp from Date
-
-Date.prototype.getUnixTime = function() { return this.getTime()/1000|0 };
-if(!Date.now) Date.now = function() { return new Date(); }
-Date.time = function() { return Date.now().getUnixTime(); }
-
 //HER KOMMER PARSER KODEN
 
 const express = require('express')
 const app = express();
-import {parser} from 'xmlToJson';
+
+let url = 'https://feeds.feedburner.com/TheHackersNews';
 
 
+var parser = function (url){
+  var parse = require('feed-reader').parse;
 
+  //Parser publishdate to epoch
+  Date.prototype.getUnixTime = function() { return this.getTime()/1000|0 };
+  if(!Date.now) Date.now = function() { return new Date(); }
+  Date.time = function() { return Date.now().getUnixTime(); }
+
+  //Her skjer selve parsinga
+  parse(url).then((feed) =>{
+    //Lager en ny liste over JSON-objektene
+    var njson = feed.entries.map(singleEntry =>{
+        var newJson = {};
+        newJson['isRegion'] = false;
+        newJson['time'] = new Date(singleEntry.publishedDate).getUnixTime();
+        newJson['text'] = singleEntry.content;
+        newJson["tags1"] = singleEntry.link;
+        newJson["tags2"] = singleEntry.author;
+        newJson["tags3"] = singleEntry.contentSnippet;  
+  njson = newJson;
+  return njson;
+})
+});
+}
 
 
 app.get('/', (req, res) => {
-
-  
-  var parse = require('feed-reader').parse;
-
-  let url = 'https://feeds.feedburner.com/TheHackersNews';
-  
-  
- /* parse(url).then((feed) => {
-    console.log(feed);
-  }).catch((err) => {
-    console.log(err);
-  }).finally(() => {
-    console.log('Everything done');
-  });
-
-  parse(url).then((feed) =>{
-    for (entry in feed.entries){
-
-      feed.entries[entry]['isRegion'] = false;
-
-      //feed.entries[entry].time = feed.entries[entry].publishedDate;
-      
-      feed.entries[entry]['time'] = new Date(feed.entries[entry].publishedDate).getUnixTime();
-      delete feed.entries[entry].publishedDate;
-
-      feed.entries[entry].text = feed.entries[entry].content;
-      delete feed.entries[entry].content;
-
-      feed.entries[entry].tags1 = feed.entries[entry].link;
-      delete feed.entries[entry].link;
-
-      feed.entries[entry].tags2 = feed.entries[entry].author;
-      delete feed.entries[entry].author;
-
-      feed.entries[entry].tags3 = feed.entries[entry].contentSnippet;
-      delete feed.entries[entry].contentSnippet;
-      //console.log(feed.entries[entry]);
-    }
-    njson = feed;
-    console.log(njson);
-  });
-  */
+  console.log("Handling get request");
+  console.log(parser());
+  res.send("hei");
 });
+
 app.listen(8000, () => {
   
   console.log('Example app listening on port 8000!')

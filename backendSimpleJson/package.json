@@ -11,8 +11,10 @@
   "dependencies": {
     "express": "^4.16.4",
     "feed-reader": "^1.1.6",
+    "influx": "^5.0.7",
     "request": "^2.88.0",
     "rss-parser": "^3.7.0",
+    "rss-to-json": "^1.0.4",
     "xml2js": "^0.4.19"
   }
 }
