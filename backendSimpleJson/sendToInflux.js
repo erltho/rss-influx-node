@@ -6,7 +6,7 @@ function parseJson(singleEntry) {
   let newJsonTmp = {}
   newJsonTmp['title'] = singleEntry.title
   //newJsonTmp['isRegion'] = false;
-  newJsonTmp['timestamp'] = new Date(singleEntry.publishedDate).getUnixTime();
+  newJsonTmp['timestamp'] = singleEntry.publishedDate;
   newJsonTmp['content'] = singleEntry.content;
   newJsonTmp['url'] = singleEntry.link;
   newJsonTmp['author'] = singleEntry.author;
@@ -17,10 +17,11 @@ function parseJson(singleEntry) {
 function parser() {
   var parse = require('feed-reader').parse;
   let url = 'https://feeds.feedburner.com/TheHackersNews';
-  //Parser publishdate to epoch
+  /*//Parser publishdate to epoch
   Date.prototype.getUnixTime = function () { return this.getTime() / 1000 | 0 };
   if (!Date.now) Date.now = function () { return new Date(); }
   Date.time = function () { return Date.now().getUnixTime(); }
+  */
   //Her skjer selve parsinga
   let feed = parse(url).then(feed =>
     feed.entries.map(singleEntry => parseJson(singleEntry))
@@ -55,8 +56,15 @@ const influx = new Influx.InfluxDB({
   schema: [
     {
       measurement: 'newsfeed',
-      fields: 'timestamp',
-      tags: ['content', 'title', 'url', 'author', 'contentSnippet']
+      fields: {
+        title: Influx.FieldType.STRING,
+        content: Influx.FieldType.STRING,
+        timestamp: Influx.FieldType.STRING,
+        contentSnippet: Influx.FieldType.STRING
+      },
+      tags: [
+        'url' 
+      ]
     }
   ]
 });
@@ -74,7 +82,7 @@ influx.getDatabaseNames()
     //Husk å skift denne dataen senere
     parseRssFeed().then(topFive => topFive.map(feed => writeDataToInflux(feed))
       //topFive.map(feed => writeDataToInflux(feed))
-      
+
       //console.log(topFive)
       //topFive.forEach(writeDataToInflux(data))
       //forEach.call(topFive.feed, writeDataToInflux(data));
@@ -88,22 +96,26 @@ influx.getDatabaseNames()
 
 //Writing data to influx
 function writeDataToInflux(data) {
-  console.log(data)
+  var content = data.content;
+  var title = data.title;
+  var timestamp = data.timestamp;
+  var urlData = data.url;
+  var author = data.author;
+  var contentSnippet = data.contentSnippet;
+
+  console.log(timestamp);
+
   influx.writePoints([
     {
       measurement: 'newsfeed',
-      tags: {
-        text: data.contentSnippet,
-        title: data.title,
-      },
-      fields: data.content,
-      timestamp: data.timestamp,
+      tags: {url: urlData},
+      fields: {title, content, timestamp, contentSnippet},
     }
   ], {
       database: 'rss',
       precision: 's',
     })
     .catch(error => {
-      console.error(`Error saving data to InfluxDB! ${err.stack}`)
+      console.error("Error saving data to InfluxDB" + error)
     });
 }
