@@ -1,6 +1,6 @@
 //Først så setter vi inn parsekoden
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+//process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 function parseJson(singleEntry) {
   let newJsonTmp = {}
@@ -48,7 +48,6 @@ function parseRssFeed() {
 var express = require('express');
 var app = express();
 const Influx = require('influx');
-var forEach = Array.prototype.forEach;
 
 const influx = new Influx.InfluxDB({
   host: 'localhost',
@@ -79,18 +78,9 @@ influx.getDatabaseNames()
     app.listen(app.get('port'), () => {
       console.log(`Listening on ${app.get('port')}.`);
     });
-    //Husk å skift denne dataen senere
     parseRssFeed().then(topFive => topFive.map(feed => writeDataToInflux(feed))
-      //topFive.map(feed => writeDataToInflux(feed))
-
-      //console.log(topFive)
-      //topFive.forEach(writeDataToInflux(data))
-      //forEach.call(topFive.feed, writeDataToInflux(data));
     ).catch(errorMessage => console.log("denne failet ved writeData" + errorMessage));
-    //writeDataToInflux(newsfeed);
-    //writeDataToInflux(hilo);
-    //writeDataToInflux(honolulu);
-    //writeDataToInflux(kahului);
+  
   })
   .catch(error => console.log({ error }));
 
