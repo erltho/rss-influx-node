@@ -9,7 +9,7 @@
   "author": "Erlend Thorsrud",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.4",
+    "express": "^4.18.2",
     "feed-reader": "^1.1.6",
     "influx": "^5.0.7",
     "request": "^2.88.0",
